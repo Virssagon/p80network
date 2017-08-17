@@ -10,7 +10,6 @@ public interface ImmutableBoard<Move> {
         for(Move move : moves) b = b.makeMove(move);
         return b;
     }
-    ImmutableBoard<Move> undoMove();
     List<Move> moves();
     List<Move> getHistory(); // last move in list = recent move
 
@@ -20,8 +19,7 @@ public interface ImmutableBoard<Move> {
         return getHistory().size() % 2 == 0;
     }
 
-    ImmutableBoard<Move> flip();
-    boolean isFlipped();
+
     String toString();
 }
 

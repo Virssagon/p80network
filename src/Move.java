@@ -1,3 +1,5 @@
+import java.io.Serializable;
+
 /**
  * Created by Memo on 27.06.2017.
  */
