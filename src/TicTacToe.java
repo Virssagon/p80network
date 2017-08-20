@@ -8,7 +8,7 @@ import java.util.stream.*;
  * Created by Memo on 30.06.2017.
  */
 @SuppressWarnings("unused")
-public class TicTacToe implements ImmutableBoard<Move> {
+public class TicTacToe implements ImmutableBoard<Move>, Serializable {
     private final int[] board;
     private final int turn;// Server ist 1, client ist -1
     private final List<Move> history;

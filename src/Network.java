@@ -8,7 +8,7 @@ import java.util.Scanner;
  * Created by Philipp on 14.08.2017.
  */
 
-public class Network{
+public class Network implements Serializable{
 
     private String ip = "localhost";
     private int port = 42000;
@@ -23,14 +23,10 @@ public class Network{
     private boolean isServer = true;
 
     public Network() {
+
         System.out.println("Bitte gib deine IP ein: ");//valid ip check
         ip = scanner.nextLine();
-        System.out.println("Bitte gib deinen Port ein: ");
-        port = scanner.nextInt();
-        while (port < 1 || port > 65535) {
-            System.out.println("Invalider Port! Bitte gib einen neuen Port ein: ");
-            port = scanner.nextInt();
-        }
+
         if (!connect()) initializeServer();
     }
 

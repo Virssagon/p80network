@@ -1,11 +1,12 @@
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Scanner;
 
 /**
  * Created by Philipp on 03.07.2017.
  */
 @SuppressWarnings("Duplicates")
-public class Main_t3 {
+public class Main_t3 implements Serializable{
     static TicTacToe game = new TicTacToe();
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
@@ -21,7 +22,6 @@ public class Main_t3 {
         }
 
         while (true) {
-            System.out.println(game.toString() + "checker");
             if(game.network.isYourTurn()){
                 user_entry = user_entry_t3() - 1;
                 TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
@@ -34,15 +34,18 @@ public class Main_t3 {
                     game.network.incrementError();
                 }
                 game.network.swapTurn();
+                System.out.println(game.toString());
             }
-            if(!game.network.isYourTurn()){
+            if(!game.network.isYourTurn() && (game.network.ois.available() != 0)){
                 try {
                     game = (TicTacToe) game.network.ois.readObject();
                 }catch(IOException e){
                     e.printStackTrace();
+                    if(game.network.ois.available() == 240)
                     game.network.incrementError();
                 }
                 game.network.swapTurn();
+                System.out.println(game.toString());
             }
 
             if (game.isWin() || game.isDraw()) {
