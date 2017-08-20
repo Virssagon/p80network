@@ -4,7 +4,7 @@ import java.util.List;
 /**
  * Created by Thomas on 30.06.2017.
  */
-public interface ImmutableBoard<Move> extends Serializable{
+public interface ImmutableBoard<Move>{
     ImmutableBoard<Move> makeMove(Move move);
     default ImmutableBoard<Move> makeMove(Move... moves) {
         ImmutableBoard<Move> b = this;

@@ -8,14 +8,12 @@ import java.util.stream.*;
  * Created by Memo on 30.06.2017.
  */
 @SuppressWarnings("unused")
-public class TicTacToe implements ImmutableBoard<Move>, Serializable {
+public class TicTacToe implements ImmutableBoard<Move>{
     private final int[] board;
     private final int turn;// Server ist 1, client ist -1
     private final List<Move> history;
     private final TicTacToe parent;
     private final int depth;
-    public Network network;
-
 
     public TicTacToe() {
         board = new int[9];
@@ -23,13 +21,11 @@ public class TicTacToe implements ImmutableBoard<Move>, Serializable {
         parent = null;
         turn = +1;
         depth = 0;
-        network = new Network();
     }
 
     public TicTacToe(TicTacToe b, Move move) {
         this.board = Arrays.copyOf(b.board, 9);
         this.history = b.history.stream().collect(Collectors.toList());
-        this.network = b.network;
         this.turn = -b.turn;
         this.board[move.getT3()] = -turn;// hier minus weil die turn zuweisung jetzt vorher geschieht
         this.depth = b.depth + 1;

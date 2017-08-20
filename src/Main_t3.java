@@ -1,14 +1,13 @@
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Scanner;
 
 /**
  * Created by Philipp on 03.07.2017.
  */
 @SuppressWarnings("Duplicates")
-public class Main_t3 implements Serializable{
+public class Main_t3{
     static TicTacToe game = new TicTacToe();
-
+    static Network network = new Network();
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         int user_entry;
         System.out.println("Hallo User, das hier ist das Spiel ~Tic-Tac-Toe~");
@@ -17,34 +16,36 @@ public class Main_t3 implements Serializable{
                 "|4|5|6|\n" +
                 "|7|8|9|");
 
-        if (!game.network.isAccepted() && game.network.isisServer()) {
-            game.network.listenForServerRequest();
+        if (!network.isAccepted() && network.isisServer()) {
+            network.listenForServerRequest();
         }
 
         while (true) {
-            if(game.network.isYourTurn()){
+            if(network.isYourTurn()){
                 user_entry = user_entry_t3() - 1;
                 TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
                 game = newGame;
                 try{
-                    game.network.oos.writeObject(game);
-                    game.network.oos.flush();
+                    network.dos.writeInt(user_entry);
+                    network.dos.flush();
                 }catch (IOException e){
                     e.printStackTrace();
-                    game.network.incrementError();
+                    network.incrementError();
                 }
-                game.network.swapTurn();
+                network.swapTurn();
                 System.out.println(game.toString());
             }
-            if(!game.network.isYourTurn() && (game.network.ois.available() != 0)){
+
+            if(!network.isYourTurn() && (network.dis.available() != 0)){
                 try {
-                    game = (TicTacToe) game.network.ois.readObject();
+                    user_entry = network.dis.readInt();
+                    TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
+                    game = newGame;
                 }catch(IOException e){
                     e.printStackTrace();
-                    if(game.network.ois.available() == 240)
-                    game.network.incrementError();
+                    network.incrementError();
                 }
-                game.network.swapTurn();
+                network.swapTurn();
                 System.out.println(game.toString());
             }
 

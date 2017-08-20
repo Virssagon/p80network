@@ -8,14 +8,14 @@ import java.util.Scanner;
  * Created by Philipp on 14.08.2017.
  */
 
-public class Network implements Serializable{
+public class Network{
 
     private String ip = "localhost";
+    private String name = "Guest";
     private int port = 42000;
-    private Scanner scanner = new Scanner(System.in);
     private Socket socket;
-    public ObjectOutputStream oos;
-    public ObjectInputStream ois;
+    public DataOutputStream dos;
+    public DataInputStream dis;
     private boolean accepted = false;
     private ServerSocket serverSocket;
     private int errors=0;
@@ -23,17 +23,17 @@ public class Network implements Serializable{
     private boolean isServer = true;
 
     public Network() {
-
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Bitte gib deine IP ein: ");//valid ip check
         ip = scanner.nextLine();
-
+        System.out.println("Bitte gib deinen Spielernamen ein: ");
+        name = scanner.nextLine();
         if (!connect()) initializeServer();
     }
 
     public boolean isAccepted() {
         return accepted;
     }
-
     public boolean isYourTurn(){
         return yourTurn;
     }
@@ -48,8 +48,8 @@ public class Network implements Serializable{
         Socket socket = null;
         try {
             socket = serverSocket.accept();
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
+            dos = new DataOutputStream(socket.getOutputStream());
+            dis = new DataInputStream(socket.getInputStream());
             accepted = true;
             System.out.println("Ein Client hat sich verbunden!");
         } catch (IOException e) {
@@ -60,8 +60,8 @@ public class Network implements Serializable{
     public boolean connect() {
         try {
             socket = new Socket(ip, port);
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
+            dos = new DataOutputStream(socket.getOutputStream());
+            dis = new DataInputStream(socket.getInputStream());
             accepted = true;
         } catch (IOException e) {
             System.out.println("Verbindung zu Adresse: " + ip + ":" + port + " konnte nicht hergestellt werden. | Starte Server!");

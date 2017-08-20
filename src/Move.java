@@ -3,7 +3,7 @@ import java.io.Serializable;
 /**
  * Created by Memo on 27.06.2017.
  */
-public class Move implements Serializable{
+public class Move{
     int ttt;
     int[] p;
     Move(int pos){
