@@ -5,10 +5,11 @@ import java.util.Scanner;
  * Created by Philipp on 03.07.2017.
  */
 @SuppressWarnings("Duplicates")
-public class Main_t3{
+public class Main_t3 {
     static TicTacToe game = new TicTacToe();
     static Network network = new Network();
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+
+    public static void main(String[] args) throws IOException {
         int user_entry;
         System.out.println("Hallo User, das hier ist das Spiel ~Tic-Tac-Toe~");
         System.out.println("Um einen Zug zu machen, gib eine Zahl von 1-9 ein(Siehe Beispiel)");
@@ -16,32 +17,54 @@ public class Main_t3{
                 "|4|5|6|\n" +
                 "|7|8|9|");
 
-        if (!network.isAccepted() && network.isisServer()) {
+        if (!network.isAccepted() && network.getisServer()) {
             network.listenForServerRequest();
         }
 
         while (true) {
-            if(network.isYourTurn()){
+
+
+
+
+            if (network.isAccepted() && (network.dis.available() == 1)) {//weg finden, dem client zu sagen dass er raus ist, weg finden dem server zu sagen das der client disconnected ist
+                try {
+                    if (isBoolean(network.dis.readUTF())) {
+                        System.out.println("Die Verbindung wurde getrennt, das Programm wird beendet!");
+                        System.exit(0);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
+
+
+
+            if (network.isYourTurn() && (!game.isWin() || !game.isDraw())) {
                 user_entry = user_entry_t3() - 1;
                 TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
                 game = newGame;
-                try{
+                try {
                     network.dos.writeInt(user_entry);
                     network.dos.flush();
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                     network.incrementError();
                 }
                 network.swapTurn();
                 System.out.println(game.toString());
+                System.out.println("Der Gegner ist am Zug...");
             }
 
-            if(!network.isYourTurn() && (network.dis.available() != 0)){
+            if (!network.isYourTurn() && (network.dis.available() == 4) && (!game.isWin() || !game.isDraw())) {
+                System.out.println(network.dis.available());
                 try {
                     user_entry = network.dis.readInt();
                     TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
                     game = newGame;
-                }catch(IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                     network.incrementError();
                 }
@@ -105,6 +128,9 @@ public class Main_t3{
                     case "e"://Spiel beenden
                         System.exit(0);
                         break;
+                    case "k"://kickt den Client vom Server
+                        if (network.getisServer()) network.disconnectPlayerFromServer();
+                        break;
                     default://Keiner der Befehle erkannt, also Fehlerhafte eingabe.
                         System.out.println("Unbekannter Befehl, gib \"help\" für eine Auswahl an Befehlen ein.: _");
                         System.out.println(game.toString());
@@ -125,12 +151,22 @@ public class Main_t3{
         System.out.println("1-9     Position des Feldes, das man besetzen möchte");
         System.out.println("exit    Beendet das Programm");
         System.out.println("help    Zeigt diese Übersicht an");
+        System.out.println("kick    Kickt den Client vom Server.(Nicht als Client verfügbar!)");
         System.out.println("?       Wie \"help_t3\"");
     }
 
     private static boolean isInteger(String string) {
         try {
             Integer.valueOf(string);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isBoolean(String string) {
+        try {
+            Boolean.getBoolean(string);
             return true;
         } catch (NumberFormatException e) {
             return false;

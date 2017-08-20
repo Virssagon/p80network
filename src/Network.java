@@ -13,7 +13,7 @@ public class Network{
     private String ip = "localhost";
     private String name = "Guest";
     private int port = 42000;
-    private Socket socket;
+    public Socket socket;
     public DataOutputStream dos;
     public DataInputStream dis;
     private boolean accepted = false;
@@ -40,7 +40,7 @@ public class Network{
     public void swapTurn(){
         yourTurn = !yourTurn;
     }
-    public boolean isisServer(){
+    public boolean getisServer(){
         return isServer;
     }
 
@@ -52,6 +52,7 @@ public class Network{
             dis = new DataInputStream(socket.getInputStream());
             accepted = true;
             System.out.println("Ein Client hat sich verbunden!");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -80,6 +81,21 @@ public class Network{
             e.printStackTrace();
         }
         yourTurn = true;
+    }
+
+    public void disconnectPlayerFromServer(){
+        try{
+            dos.writeBoolean(true);
+            serverSocket.close();
+            System.out.println("Spieler wurde gekickt!");
+            initializeServer();
+            System.out.println("Warte auf neuen Spieler... ");
+            listenForServerRequest();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
     }
 
     public void incrementError(){
