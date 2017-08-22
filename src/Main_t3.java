@@ -23,50 +23,28 @@ public class Main_t3 {
 
         while (true) {
 
-
-
-
-            if (network.isAccepted() && (network.dis.available() == 1)) {//weg finden, dem client zu sagen dass er raus ist, weg finden dem server zu sagen das der client disconnected ist
-                try {
-                    if (isBoolean(network.dis.readUTF())) {
-                        System.out.println("Die Verbindung wurde getrennt, das Programm wird beendet!");
-                        System.exit(0);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-
-
-
-
-
             if (network.isYourTurn() && (!game.isWin() || !game.isDraw())) {
                 user_entry = user_entry_t3() - 1;
                 TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
                 game = newGame;
                 try {
-                    network.dos.writeInt(user_entry);
-                    network.dos.flush();
+                    network.out.writeInt(user_entry);
+                    network.out.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    network.incrementError();
                 }
                 network.swapTurn();
                 System.out.println(game.toString());
                 System.out.println("Der Gegner ist am Zug...");
             }
 
-            if (!network.isYourTurn() && (network.dis.available() == 4) && (!game.isWin() || !game.isDraw())) {
-                System.out.println(network.dis.available());
+            if (!network.isYourTurn() && (network.in.available() == 4) && (!game.isWin() || !game.isDraw())) {
                 try {
-                    user_entry = network.dis.readInt();
+                    user_entry = network.in.readInt();
                     TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
                     game = newGame;
                 } catch (IOException e) {
                     e.printStackTrace();
-                    network.incrementError();
                 }
                 network.swapTurn();
                 System.out.println(game.toString());

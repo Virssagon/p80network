@@ -2,25 +2,28 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.Scanner;
 
 /**
  * Created by Philipp on 14.08.2017.
  */
 
-public class Network{
+public class Network {
 
     private String ip = "localhost";
     private String name = "Guest";
     private int port = 42000;
     public Socket socket;
-    public DataOutputStream dos;
-    public DataInputStream dis;
-    private boolean accepted = false;
+    public DataOutputStream out;
+    public DataInputStream in;
     private ServerSocket serverSocket;
-    private int errors=0;
+
+    private boolean accepted = false;
     private boolean yourTurn;
     private boolean isServer = true;
+
+
 
     public Network() {
         Scanner scanner = new Scanner(System.in);
@@ -31,25 +34,28 @@ public class Network{
         if (!connect()) initializeServer();
     }
 
-    public boolean isAccepted() {
-        return accepted;
-    }
-    public boolean isYourTurn(){
-        return yourTurn;
-    }
-    public void swapTurn(){
-        yourTurn = !yourTurn;
-    }
-    public boolean getisServer(){
-        return isServer;
+    public void evaluateInputStream() {
+        String s = "";
+        try {
+            if (isAccepted() && (in.available() != 0)) {
+                s = in.readUTF();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (Objects.equals((s.length() != 0 ? s.substring(0, 1).toLowerCase() : s), "!")) {
+            //Hier kommen alle möglichen befehle in einem switch hin in der form !kick !aufgeben !...
+        } else {
+            //Kein Befehl? dann Sende als Chat
+        }
     }
 
     public void listenForServerRequest() {
         Socket socket = null;
         try {
             socket = serverSocket.accept();
-            dos = new DataOutputStream(socket.getOutputStream());
-            dis = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
             accepted = true;
             System.out.println("Ein Client hat sich verbunden!");
 
@@ -61,8 +67,8 @@ public class Network{
     public boolean connect() {
         try {
             socket = new Socket(ip, port);
-            dos = new DataOutputStream(socket.getOutputStream());
-            dis = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
             accepted = true;
         } catch (IOException e) {
             System.out.println("Verbindung zu Adresse: " + ip + ":" + port + " konnte nicht hergestellt werden. | Starte Server!");
@@ -76,32 +82,41 @@ public class Network{
 
     public void initializeServer() {
         try {
-            serverSocket = new ServerSocket(port, 8, InetAddress.getByName(ip));
+            System.out.println(InetAddress.getByName(ip));
+            serverSocket = new ServerSocket(port, 8);
         } catch (Exception e) {
             e.printStackTrace();
         }
         yourTurn = true;
     }
 
-    public void disconnectPlayerFromServer(){
-        try{
-            dos.writeBoolean(true);
+    public void disconnectPlayerFromServer() {
+        try {
+            out.writeBoolean(true);
             serverSocket.close();
             System.out.println("Spieler wurde gekickt!");
             initializeServer();
             System.out.println("Warte auf neuen Spieler... ");
             listenForServerRequest();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
-    public void incrementError(){
-        errors++;
+
+    public boolean isAccepted() {
+        return accepted;
     }
-    public int getErrors(){
-        return errors;
+
+    public boolean isYourTurn() {
+        return yourTurn;
+    }
+
+    public void swapTurn() {
+        yourTurn = !yourTurn;
+    }
+
+    public boolean getisServer() {
+        return isServer;
     }
 }
