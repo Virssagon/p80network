@@ -48,6 +48,9 @@ public class Network {
             e.printStackTrace();
         }
         if (Objects.equals((s.length() != 0 ? s.substring(0, 1).toLowerCase() : s), "!")) {
+            if(s.contains("playerName")){
+                String player2 = s.substring(s.indexOf("="),s.length()-1);
+            }
             switch (s) {
                 case "!kick":
                     if (getisServer()) {//kick ist server only, deswegen passiert als client nichts
@@ -64,6 +67,7 @@ public class Network {
                     }
                     break;
                 case "!makeMove"://wie machst du einen move als string befehl? am besten !makemove[d] als regex
+                    break;
                 default:
                     System.out.println("Unbekannter Befehl!");
                     break;
