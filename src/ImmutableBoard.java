@@ -12,7 +12,7 @@ public interface ImmutableBoard<Move>{
         return b;
     }
     List<Move> moves();
-    List<Move> getHistory(); // last move in list = recent move
+    List<Move> getHistory(); // last move dis list = recent move
 
     boolean isWin();
     boolean isDraw();

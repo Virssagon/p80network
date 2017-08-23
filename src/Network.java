@@ -8,15 +8,15 @@ import java.util.Scanner;
 /**
  * Created by Philipp on 14.08.2017.
  */
-
+@SuppressWarnings("Duplicates")
 public class Network {
 
     private String ip = "localhost";
     private String name = "Guest";
     private int port = 42000;
     public Socket socket;
-    public DataOutputStream out;
-    public DataInputStream in;
+    public DataOutputStream dos;
+    public DataInputStream dis;
     private ServerSocket serverSocket;
 
     private boolean accepted = false;
@@ -24,27 +24,88 @@ public class Network {
     private boolean isServer = true;
 
 
-
     public Network() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Bitte gib deine IP ein: ");//valid ip check
-        ip = scanner.nextLine();
+        //ip = scanner.nextLine();
         System.out.println("Bitte gib deinen Spielernamen ein: ");
-        name = scanner.nextLine();
+        //name = scanner.nextLine();
         if (!connect()) initializeServer();
     }
 
     public void evaluateInputStream() {
         String s = "";
         try {
-            if (isAccepted() && (in.available() != 0)) {
-                s = in.readUTF();
+            if (isAccepted() && (dis.available() != 0)) {
+                Thread.sleep(100);
+                s = dis.readUTF();
+                System.out.println("DIS_CHECK: " + s);
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("MyErrorMSG: Fehler beim pausieren des Thread!");
+            e.printStackTrace();
         }
         if (Objects.equals((s.length() != 0 ? s.substring(0, 1).toLowerCase() : s), "!")) {
-            //Hier kommen alle möglichen befehle in einem switch hin in der form !kick !aufgeben !...
+            switch (s) {
+                case "!kick":
+                    if (getisServer()) {//kick ist server only, deswegen passiert als client nichts
+                        disconnectPlayerFromServer(1);
+                    } else {
+                        System.out.println("Du wurdest aus der Sitzung geworfen!");
+                    }
+                    break;
+                case "!userDisconnected":
+                    if (getisServer()) {
+                        System.out.println("Der Client hat die Verbindung getrennt!");
+                    } else {
+                        System.out.println("Der Server hat die Verbindung getrennt!");
+                    }
+                    break;
+                case "!makeMove"://wie machst du einen move als string befehl? am besten !makemove[d] als regex
+                default:
+                    System.out.println("Unbekannter Befehl!");
+                    break;
+            }
+        } else {
+            //Kein Befehl? dann Sende als Chat
+        }
+    }
+
+    public void evaluateInputStream(String s) {
+        try {
+            if (isAccepted() && (dis.available() != 0)) {
+                Thread.sleep(100);
+                s = dis.readUTF();
+                System.out.println("DIS_CHECK: " + s);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            System.out.println("MyErrorMSG: Fehler beim pausieren des Thread!");
+            e.printStackTrace();
+        }
+        if (Objects.equals((s.length() != 0 ? s.substring(0, 1).toLowerCase() : s), "!")) {
+            switch (s) {
+                case "!kick"://Wenn der Client exit drückt, bekommt der Server einen !clientDisconnected
+                    if (getisServer()) {//kick ist server only, deswegen passiert als client nichts
+                        disconnectPlayerFromServer(1);
+                    } else {
+                        System.out.println("Du wurdest aus der Sitzung geworfen!");
+                    }
+                    break;
+                case "!userDisconnected":
+                    if (getisServer()) {
+                        System.out.println("Der Client hat die Verbindung getrennt!");
+                    } else {
+                        System.out.println("Der Server hat die Verbindung getrennt!");
+                    }
+                    break;
+                default:
+                    System.out.println("Unbekannter Befehl!");
+                    break;
+            }
         } else {
             //Kein Befehl? dann Sende als Chat
         }
@@ -54,8 +115,8 @@ public class Network {
         Socket socket = null;
         try {
             socket = serverSocket.accept();
-            out = new DataOutputStream(socket.getOutputStream());
-            in = new DataInputStream(socket.getInputStream());
+            dos = new DataOutputStream(socket.getOutputStream());
+            dis = new DataInputStream(socket.getInputStream());
             accepted = true;
             System.out.println("Ein Client hat sich verbunden!");
 
@@ -67,8 +128,8 @@ public class Network {
     public boolean connect() {
         try {
             socket = new Socket(ip, port);
-            out = new DataOutputStream(socket.getOutputStream());
-            in = new DataInputStream(socket.getInputStream());
+            dos = new DataOutputStream(socket.getOutputStream());
+            dis = new DataInputStream(socket.getInputStream());
             accepted = true;
         } catch (IOException e) {
             System.out.println("Verbindung zu Adresse: " + ip + ":" + port + " konnte nicht hergestellt werden. | Starte Server!");
@@ -82,7 +143,6 @@ public class Network {
 
     public void initializeServer() {
         try {
-            System.out.println(InetAddress.getByName(ip));
             serverSocket = new ServerSocket(port, 8);
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,11 +150,17 @@ public class Network {
         yourTurn = true;
     }
 
-    public void disconnectPlayerFromServer() {
+    public void disconnectPlayerFromServer(int i) {//Was soll passieren wenn der Gegner disconnected? automatisch nach neuem suchen? neues spiel? startbildschirm?
         try {
-            out.writeBoolean(true);
             serverSocket.close();
-            System.out.println("Spieler wurde gekickt!");
+            switch (i) {
+                case 1:
+                    System.out.println("Spieler wurde gekickt!");
+                    break;
+                case 2:
+                    System.out.println("Der Gegner hat die Verbindung getrennt!");
+                    break;
+            }
             initializeServer();
             System.out.println("Warte auf neuen Spieler... ");
             listenForServerRequest();

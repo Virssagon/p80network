@@ -22,14 +22,14 @@ public class Main_t3 {
         }
 
         while (true) {
-
+            network.evaluateInputStream();
             if (network.isYourTurn() && (!game.isWin() || !game.isDraw())) {
                 user_entry = user_entry_t3() - 1;
                 TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
                 game = newGame;
                 try {
-                    network.out.writeInt(user_entry);
-                    network.out.flush();
+                    network.dos.writeInt(user_entry);
+                    network.dos.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -37,10 +37,9 @@ public class Main_t3 {
                 System.out.println(game.toString());
                 System.out.println("Der Gegner ist am Zug...");
             }
-
-            if (!network.isYourTurn() && (network.in.available() == 4) && (!game.isWin() || !game.isDraw())) {
+            if (!network.isYourTurn() && (network.dis.available() == 4) && (!game.isWin() || !game.isDraw())) {
                 try {
-                    user_entry = network.in.readInt();
+                    user_entry = network.dis.readInt();
                     TicTacToe newGame = (TicTacToe) game.makeMove(new Move(user_entry));
                     game = newGame;
                 } catch (IOException e) {
@@ -104,10 +103,14 @@ public class Main_t3 {
                         System.out.println(game.toString());
                         break;
                     case "e"://Spiel beenden
+                        network.dos.writeUTF("!userDisconnected");
+                        network.dos.flush();
                         System.exit(0);
                         break;
                     case "k"://kickt den Client vom Server
-                        if (network.getisServer()) network.disconnectPlayerFromServer();
+                            network.dos.writeUTF("!kick");
+                            network.evaluateInputStream("!kick");
+                            network.dos.flush();
                         break;
                     default://Keiner der Befehle erkannt, also Fehlerhafte eingabe.
                         System.out.println("Unbekannter Befehl, gib \"help\" für eine Auswahl an Befehlen ein.: _");
@@ -125,7 +128,7 @@ public class Main_t3 {
                 "|4|5|6|\n" +
                 "|7|8|9|");
         System.out.println("Es wird abwechselnd gezogen. Gewonnen hat," +
-                " wer zuerst drei Spielsteine(entweder X oder O) in Reihe anordnet");
+                " wer zuerst drei Spielsteine(entweder X oder O) dis Reihe anordnet");
         System.out.println("1-9     Position des Feldes, das man besetzen möchte");
         System.out.println("exit    Beendet das Programm");
         System.out.println("help    Zeigt diese Übersicht an");
